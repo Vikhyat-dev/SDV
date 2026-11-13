@@ -192,25 +192,3 @@ The simulator models an automotive Over-The-Air (OTA) update workflow between an
 
 ---
 
-## 8. Top 10 Likely Viva Questions & Answers
-
-1. **Q: Why does an Airbag ECU need both a Digital Signature and a SHA-256 Checksum?**  
-   *A:* Digital Signatures (ECDSA P-256) prove **Authenticity** (the update came from the legitimate OEM). SHA-256 proves **Integrity** (not a single byte was corrupted or altered in transit).
-2. **Q: How is this simulation mathematically genuine without being hardcoded?**  
-   *A:* It uses the browser's native `window.crypto.subtle` Web Crypto API. Genuine ECDSA P-256 keys are generated, real SHA-256 byte digests are calculated, and cryptographic signature verification executes on actual payload strings.
-3. **Q: What is an automotive-style A/B dual-slot flash architecture?**  
-   *A:* Flash memory is split into two independent banks: Slot A (active) and Slot B (backup/update). If an update fails verification or boot, the bootloader instantly reverts execution to the known-good code in Slot B, preventing vehicle bricking.
-4. **Q: What happens if an attacker tampers with the firmware and also changes the expected SHA-256 hash in the manifest?**  
-   *A:* The attacker's modified hash might match their modified file, but they lack the OEM's private key. The ECU's ECDSA signature verification against the pre-installed OEM public key will fail.
-5. **Q: Why should firmware never be flashed directly into active memory while downloading?**  
-   *A:* If the network drops or the payload is corrupted mid-transfer, active flash would be left in an inconsistent state, rendering the vehicle's safety restraint system disabled. Staging RAM buffers prevent this.
-6. **Q: What are the 4 checks in your Dynamic ECU Post-Update Health Check?**  
-   *A:* 1) Firmware Integrity Check (flash block hash/CRC consistency), 2) ECU Boot Success (bootloader reset vector validation), 3) Configuration Validation (calibration tables and target ACU-01 ID match), and 4) Simulated Diagnostic Self-Test (internal ECU self-diagnostics pass).
-7. **Q: Why is automatic rollback especially critical for an Airbag Control Unit?**  
-   *A:* An Airbag Control Unit is a Class-A life-safety system. A bricked ACU leaves passengers completely unprotected in a crash. Automatic rollback ensures the vehicle immediately retains certified restraint deployment readiness.
-8. **Q: What is the cryptographic "avalanche effect" in SHA-256?**  
-   *A:* Changing even a single bit in the input message flips over 50% of the output hash bits. This makes any unauthorized calibration modification instantly detectable.
-9. **Q: Where does the ECU store the OEM Public Key in a real vehicle?**  
-   *A:* In a tamper-resistant Hardware Security Module (HSM) or Secure Hardware Extension (SHE) provisioned during factory manufacturing.
-10. **Q: What automotive standards govern secure OTA software updates?**  
-    *A:* UN ECE Regulation 156 (Software Update Management System - SUMS) and ISO 24089 (Road vehicles — Software update engineering).
