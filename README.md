@@ -167,28 +167,3 @@ The simulator models an automotive Over-The-Air (OTA) update workflow between an
 
 ---
 
-## 7. Spoken Demonstration Script (2–3 Minutes for Teacher)
-
-> "Hello Professor. Today I am demonstrating our project: **Signed OTA Firmware Update Simulator for an Automotive Airbag Control Unit (ACU-01) with Checksum Verification and Automatic Rollback.**
-> 
-> **[Scope & Initial State]**  
-> This project is an educational simulator strictly scoped to one safety-critical ECU: the Airbag Control Unit, ACU-01. As you can see on the dashboard, the ECU is initially running certified factory firmware version 1.0.0 in Slot A (Active Bank). We utilize an automotive-style A/B dual-slot flash architecture, where Slot B serves as an untouched recovery backup bank.
-> 
-> **[Demonstrating the Valid Flow]**  
-> First, I will trigger a valid OTA update by clicking **SIMULATE VALID OTA UPDATE**.  
-> The OEM Cloud broadcasts signed candidate firmware version 1.1.0. The ECU downloads the package into temporary staging RAM.  
-> Next is the cryptographic gate: the ECU verifies the ECDSA P-256 digital signature using the pre-installed OEM public key, proving the update originated from the genuine manufacturer.  
-> Then, using the browser's Web Crypto API, the ECU calculates the real SHA-256 checksum across the downloaded bytes and compares it with the manifest. Both checks pass.  
-> Current firmware v1.0.0 is secured in Slot B, v1.1.0 is flashed into Slot A, and the ECU reboots. It performs a 4-point dynamic health check—Firmware Integrity, ECU Boot Success, Configuration Validation, and Diagnostic Self-Test. All 4 pass, and version 1.1.0 is active.
-> 
-> **[Demonstrating Tampering & Rollback]**  
-> Now, I will demonstrate the core contribution of our project: the tampered failure case and automatic rollback. I will click **Demo Reset**, followed by **SIMULATE TAMPERED OTA UPDATE**.  
-> In this scenario, an attacker intercepts the package in transit and alters key calibration parameters—such as lowering the deployment threshold G-force. Notice that the packet metadata still retains the OEM's original expected signature and hash.  
-> When the ECU runs verification, the ECDSA signature verification FAILS, and the computed SHA-256 hash reports a MISMATCH.  
-> Because of this cryptographic failure, the ECU's security supervisor immediately ABORTS installation. Untrusted code is never written to flash.  
-> The bootloader triggers AUTOMATIC ROLLBACK, restoring known-good firmware version 1.0.0 from Slot B. Post-rollback health checks run, and the ECU safely returns to READY state running version 1.0.0.
-> 
-> In conclusion, our simulator proves that combining asymmetric digital signatures, SHA-256 hashing, and an A/B dual-slot memory architecture guarantees that a safety-critical Airbag ECU can never be compromised or bricked by a corrupted OTA transmission. Thank you!"
-
----
-
